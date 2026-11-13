@@ -35,6 +35,8 @@ formDemanda.addEventListener('submit', function (e) {
     }
   }
 
+  const indicação = document.getElementById('indicação').value.trim();
+  const processo = document.getElementById('processo').value.trim();
   const descricao = document.getElementById('descricao').value.trim();
 
   const novaDemanda = {
@@ -46,6 +48,8 @@ formDemanda.addEventListener('submit', function (e) {
     bairro,
     origem,
     categoria,
+    indicação,
+    processo,
     descricao,
     status: 'Pendente',
     dataCriacao: new Date().toLocaleDateString('pt-BR')
@@ -66,7 +70,6 @@ function salvarNoLocalStorage() {
 function renderizarTabela() {
   tabelaDemandasBody.innerHTML = '';
   
-  // Filtro de busca em tempo real
   const termoBusca = inputBusca ? inputBusca.value.toLowerCase() : '';
   const demandasFiltradas = demandas.filter(d => {
     return (
@@ -74,7 +77,9 @@ function renderizarTabela() {
       d.rua.toLowerCase().includes(termoBusca) ||
       d.bairro.toLowerCase().includes(termoBusca) ||
       d.categoria.toLowerCase().includes(termoBusca) ||
-      d.protocolo.toString().includes(termoBusca)
+      d.protocolo.toString().includes(termoBusca) ||
+      (d.indicação && d.indicação.toLowerCase().includes(termoBusca)) ||
+      (d.processo && d.processo.toLowerCase().includes(termoBusca))
     );
   });
 
@@ -103,11 +108,20 @@ function renderizarTabela() {
     if (demanda.status === 'Em Andamento') statusCor = 'bg-blue-100 text-blue-800';
     if (demanda.status === 'Resolvido') statusCor = 'bg-green-100 text-green-800';
 
+    // Montando a tag de documentos oficiais da câmara, se preenchidos
+    let infoCamara = `<div class="text-xs text-gray-500 mt-1">Origem: ${demanda.origem}</div>`;
+    if (demanda.indicação || demanda.processo) {
+      infoCamara += `<div class="text-xs text-blue-700 mt-0.5 font-medium">`;
+      if (demanda.indicação) infoCamara += `Ind: ${escapeHtml(demanda.indicação)} `;
+      if (demanda.processo) infoCamara += `Proc: ${escapeHtml(demanda.processo)}`;
+      infoCamara += `</div>`;
+    }
+
     tr.innerHTML = `
       <td class="py-3 px-3">
         <div class="font-semibold text-gray-800">${escapeHtml(demanda.nome)}</div>
         <div class="text-xs text-gray-400">Prot. #${demanda.protocolo} • ${demanda.dataCriacao}</div>
-        <div class="text-xs text-gray-500 mt-1 line-clamp-1" title="${escapeHtml(demanda.descricao)}"><b>${escapeHtml(demanda.categoria)}</b>: "${escapeHtml(demanda.descricao)}"</div>
+        <div class="text-xs text-gray-600 mt-1 line-clamp-1" title="${escapeHtml(demanda.descricao)}"><b>${escapeHtml(demanda.categoria)}</b>: "${escapeHtml(demanda.descricao)}"</div>
       </td>
       <td class="py-3 px-3 text-xs text-gray-600">
         <div class="font-medium text-gray-800">${escapeHtml(demanda.rua)}</div>
@@ -117,6 +131,7 @@ function renderizarTabela() {
         <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${tagOrigemCor}">
           ${demanda.origem}
         </span>
+        ${infoCamara}
       </td>
       <td class="py-3 px-3">
         <select onchange="alterarStatus(${demanda.id}, this.value)" 
@@ -156,11 +171,19 @@ function enviarWhatsApp(id) {
     numTelefone = '55' + numTelefone;
   }
 
+  // Injetando os números da câmara no texto do WhatsApp se existirem
+  let blocoCamara = '';
+  if (demanda.indicação || demanda.processo) {
+    blocoCamara = `\n📄 *Dados Oficiais na Câmara:*`;
+    if (demanda.indicação) blocoCamara += `\n• Indicação: ${demanda.indicação}`;
+    if (demanda.processo) blocoCamara += `\n• Processo: ${demanda.processo}`;
+  }
+
   const textoMensagem = `Olá, ${demanda.nome}! 👋
 
-Aqui é do Gabinete do Vereador Patrick Motta. Passando para atualizar sobre a sua solicitação referente a *${demanda.categoria}* na região de *${demanda.rua}, Bairro ${demanda.bairro}* (Protocolo #${demanda.protocolo}).
+Aqui é do Gabinete do Vereador. Passando para atualizar sobre a sua solicitação referente a *${demanda.categoria}* na região de *${demanda.rua}, Bairro ${demanda.bairro}* (Protocolo Interno #${demanda.protocolo}).
 
-📌 *Status Atual:* ${demanda.status.toUpperCase()}
+📌 *Status Atual:* ${demanda.status.toUpperCase()}${blocoCamara}
 
 Qualquer novidade ou atualização, informaremos você por aqui. Conte conosco! 😊`;
 
