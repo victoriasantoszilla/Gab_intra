@@ -1,25 +1,43 @@
-// array para armazenar as demandas na memória local
 let demandas = JSON.parse(localStorage.getItem('demandas_gabinete')) || [];
 
-// Elementos do DOM
 const formDemanda = document.getElementById('formDemanda');
 const tabelaDemandasBody = document.getElementById('tabelaDemandasBody');
 const totalDemandasSpan = document.getElementById('totalDemandas');
+const selectCategoria = document.getElementById('categoria');
+const divOutrosEspecificar = document.getElementById('divOutrosEspecificar');
+
+// Função para mostrar ou esconder o campo de especificação de "Outros"
+function verificarCategoriaOutros() {
+  if (selectCategoria.value === 'Outros') {
+    divOutrosEspecificar.classList.remove('hidden');
+    document.getElementById('outroEspecificacao').setAttribute('required', 'true');
+  } else {
+    divOutrosEspecificar.classList.add('hidden');
+    document.getElementById('outroEspecificacao').removeAttribute('required');
+    document.getElementById('outroEspecificacao').value = '';
+  }
+}
 
 // 1. EVENTO DE CADASTRO DE NOVA DEMANDA
 formDemanda.addEventListener('submit', function (e) {
   e.preventDefault();
 
-  // Capturando valores dos campos (agora incluindo rua e bairro textuais)
   const nome = document.getElementById('nome').value.trim();
   const telefone = document.getElementById('telefone').value.trim().replace(/\D/g, '');
   const rua = document.getElementById('rua').value.trim();
   const bairro = document.getElementById('bairro').value.trim();
   const origem = document.getElementById('origem').value;
-  const categoria = document.getElementById('categoria').value;
+  
+  let categoria = selectCategoria.value;
+  if (categoria === 'Outros') {
+    const especificacao = document.getElementById('outroEspecificacao').value.trim();
+    if (especificacao) {
+      categoria = `Outros (${especificacao})`;
+    }
+  }
+
   const descricao = document.getElementById('descricao').value.trim();
 
-  // Criando o objeto da nova demanda
   const novaDemanda = {
     id: Date.now(),
     protocolo: Math.floor(1000 + Math.random() * 9000),
@@ -38,6 +56,7 @@ formDemanda.addEventListener('submit', function (e) {
   salvarNoLocalStorage();
 
   formDemanda.reset();
+  verificarCategoriaOutros(); // Reseta a visibilidade do campo outros
   renderizarTabela();
 });
 
@@ -78,7 +97,7 @@ function renderizarTabela() {
       <td class="py-3 px-3">
         <div class="font-semibold text-gray-800">${escapeHtml(demanda.nome)}</div>
         <div class="text-xs text-gray-400">Prot. #${demanda.protocolo} • ${demanda.dataCriacao}</div>
-        <div class="text-xs text-gray-500 mt-1 line-clamp-1" title="${escapeHtml(demanda.descricao)}">${escapeHtml(demanda.categoria)}: "${escapeHtml(demanda.descricao)}"</div>
+        <div class="text-xs text-gray-500 mt-1 line-clamp-1" title="${escapeHtml(demanda.descricao)}"><b>${escapeHtml(demanda.categoria)}</b>: "${escapeHtml(demanda.descricao)}"</div>
       </td>
       <td class="py-3 px-3 text-xs text-gray-600">
         <div class="font-medium text-gray-800">${escapeHtml(demanda.rua)}</div>
@@ -113,7 +132,7 @@ function renderizarTabela() {
   });
 }
 
-// 4. FUNÇÃO PARA DISPARAR O WHATSAPP COM A RUA E O BAIRRO
+// 4. FUNÇÃO PARA DISPARAR O WHATSAPP
 function enviarWhatsApp(id) {
   const demanda = demandas.find((d) => d.id === id);
   if (!demanda) return;

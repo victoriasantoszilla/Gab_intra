@@ -19,7 +19,7 @@
           <p class="text-xs text-blue-200">Sistema Único de Triagem e Gestão de Demandas</p>
         </div>
       </div>
-      <span class="bg-blue-800 text-xs px-3 py-1 rounded-full border border-blue-700">MVP v1.1</span>
+      <span class="bg-blue-800 text-xs px-3 py-1 rounded-full border border-blue-700">MVP v1.2</span>
     </div>
   </header>
 
@@ -49,7 +49,7 @@
             class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
 
-        <!-- Rua e Bairro (Campos de texto livre) -->
+        <!-- Rua e Bairro -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">Rua / Logradouro</label>
@@ -78,20 +78,30 @@
 
           <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">Categoria</label>
-            <select id="categoria" required class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-              <option value="Iluminação Pública">Iluminação Pública</option>
-              <option value="Tapa-Buraco / Asfalto">Tapa-Buraco / Asfalto</option>
-              <option value="Poda de Árvores">Poda de Árvores</option>
-              <option value="Saúde">Saúde / Posto</option>
+            <select id="categoria" required onchange="verificarCategoriaOutros()" class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+              <option value="Infraestrutura e obras públicas">Infraestrutura e obras públicas</option>
+              <option value="Saúde e Postos de Atendimento">Saúde e Postos de Atendimento</option>
+              <option value="Educação">Educação</option>
+              <option value="Esportes e Lazer">Esportes e Lazer</option>
+              <option value="Assistência social">Assistência social</option>
+              <option value="Cultura">Cultura</option>
+              <option value="Meio ambiente">Meio ambiente</option>
               <option value="Outros">Outros</option>
             </select>
           </div>
         </div>
 
+        <!-- Campo Dinâmico para "Outros" (Aparece apenas se selecionar Outros) -->
+        <div id="divOutrosEspecificar" class="hidden">
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Especifique o tipo de "Outros"</label>
+          <input type="text" id="outroEspecificacao" placeholder="Ex: Defesa Civil, Segurança, etc." 
+            class="w-full text-sm px-3 py-2 border border-amber-300 bg-amber-50 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+        </div>
+
         <!-- Descrição da Demanda -->
         <div>
-          <label class="block text-xs font-semibold text-gray-700 mb-1">Descrição Detalhada</label>
-          <textarea id="descricao" rows="3" required placeholder="Descreva brevemente o pedido do morador..." 
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Descreva a solicitação ou necessidade. O que o munícipe gostaria que fosse realizado?</label>
+          <textarea id="descricao" rows="3" required placeholder="Detalhe o que o munícipe pediu..." 
             class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
         </div>
 
