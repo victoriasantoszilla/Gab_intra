@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intranet do Gabinete - Gestão de Demandas</title>
+  <!-- Tailwind CSS via CDN (Leve e direto no navegador) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen text-gray-800">
+
+  <!-- Cabeçalho / Navbar -->
+  <header class="bg-blue-900 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl">🏛️</span>
+        <div>
+          <h1 class="text-xl font-bold leading-tight">Gabinete Digital</h1>
+          <p class="text-xs text-blue-200">Sistema Único de Triagem e Gestão de Demandas</p>
+        </div>
+      </div>
+      <span class="bg-blue-800 text-xs px-3 py-1 rounded-full border border-blue-700">MVP v1.0</span>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- COLUNA 1: Form de Triagem (1 Coluna em telas grandes) -->
+    <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit">
+      <h2 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+        <span>📝</span> Cadastrar Nova Demanda
+      </h2>
+      <p class="text-xs text-gray-500 mb-6">Registre o pedido vindo de redes sociais ou presencial.</p>
+
+      <form id="formDemanda" class="space-y-4">
+        
+        <!-- Nome do Cidadão -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Nome Completo do Munícipe</label>
+          <input type="text" id="nome" required placeholder="Ex: Maria da Silva" 
+            class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <!-- Telefone / WhatsApp -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">WhatsApp / Telefone (com DDD)</label>
+          <input type="tel" id="telefone" required placeholder="Ex: 24999998888" 
+            class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <!-- Bairro e Origem do Canal (Grid de 2 colunas) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Bairro</label>
+            <select id="bairro" required class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+              <option value="">Selecione...</option>
+              <option value="Centro">Centro</option>
+              <option value="Vila Nova">Vila Nova</option>
+              <option value="Jardim América">Jardim América</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Origem da Demanda</label>
+            <select id="origem" required class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+              <option value="WhatsApp">🟢 WhatsApp</option>
+              <option value="Instagram">📷 Instagram</option>
+              <option value="Presencial">🤝 Presencial / Rua</option>
+              <option value="Telefone">📞 Ligação</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Categoria do Serviço -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Categoria do Pedido</label>
+          <select id="categoria" required class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+            <option value="Iluminação Pública">Iluminação Pública</option>
+            <option value="Tapa-Buraco / Asfalto">Tapa-Buraco / Asfalto</option>
+            <option value="Poda de Árvores">Poda de Árvores / Limpeza</option>
+            <option value="Saúde / Posto de Saúde">Saúde / Posto de Saúde</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+
+        <!-- Descrição da Demanda -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Descrição Detalhada</label>
+          <textarea id="descricao" rows="3" required placeholder="Descreva brevemente o pedido do morador..." 
+            class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Botão de Envio -->
+        <button type="submit" 
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2.5 rounded-lg transition duration-200 shadow-sm">
+          + Salvar Demanda
+        </button>
+
+      </form>
+    </section>
+
+    <!-- COLUNA 2: Tabela de Acompanhamento (2 Colunas em telas grandes) -->
+    <section class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <span>📊</span> Painel Geral de Demandas
+          </h2>
+          <p class="text-xs text-gray-500">Acompanhe o andamento e envie retornos via WhatsApp em 1 clique.</p>
+        </div>
+        <span id="totalDemandas" class="bg-gray-100 text-gray-700 font-medium text-xs px-3 py-1.5 rounded-lg border">
+          Total: 0 registradas
+        </span>
+      </div>
+
+      <!-- Tabela Responsiva -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs uppercase font-semibold">
+              <th class="py-3 px-3">Cidadão / Contato</th>
+              <th class="py-3 px-3">Bairro</th>
+              <th class="py-3 px-3">Origem</th>
+              <th class="py-3 px-3">Status</th>
+              <th class="py-3 px-3 text-center">Ações de Retorno</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaDemandasBody" class="divide-y divide-gray-100">
+            <!-- As linhas serão inseridas dinamicamente via JavaScript aqui -->
+            <tr>
+              <td colspan="5" class="py-8 text-center text-gray-400 text-xs italic">
+                Nenhuma demanda cadastrada no momento. Use o formulário ao lado.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+  <script src="script.js"></script>
+
+</body>
+</html>
