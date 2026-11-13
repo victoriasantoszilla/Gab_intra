@@ -5,8 +5,8 @@ const tabelaDemandasBody = document.getElementById('tabelaDemandasBody');
 const totalDemandasSpan = document.getElementById('totalDemandas');
 const selectCategoria = document.getElementById('categoria');
 const divOutrosEspecificar = document.getElementById('divOutrosEspecificar');
+const inputBusca = document.getElementById('inputBusca');
 
-// Função para mostrar ou esconder o campo de especificação de "Outros"
 function verificarCategoriaOutros() {
   if (selectCategoria.value === 'Outros') {
     divOutrosEspecificar.classList.remove('hidden');
@@ -18,7 +18,6 @@ function verificarCategoriaOutros() {
   }
 }
 
-// 1. EVENTO DE CADASTRO DE NOVA DEMANDA
 formDemanda.addEventListener('submit', function (e) {
   e.preventDefault();
 
@@ -56,31 +55,42 @@ formDemanda.addEventListener('submit', function (e) {
   salvarNoLocalStorage();
 
   formDemanda.reset();
-  verificarCategoriaOutros(); // Reseta a visibilidade do campo outros
+  verificarCategoriaOutros();
   renderizarTabela();
 });
 
-// 2. FUNÇÃO PARA SALVAR NO LOCALSTORAGE
 function salvarNoLocalStorage() {
   localStorage.setItem('demandas_gabinete', JSON.stringify(demandas));
 }
 
-// 3. FUNÇÃO PARA RENDERIZAR A TABELA DINÂMICA
 function renderizarTabela() {
   tabelaDemandasBody.innerHTML = '';
-  totalDemandasSpan.innerText = `Total: ${demandas.length} registradas`;
+  
+  // Filtro de busca em tempo real
+  const termoBusca = inputBusca ? inputBusca.value.toLowerCase() : '';
+  const demandasFiltradas = demandas.filter(d => {
+    return (
+      d.nome.toLowerCase().includes(termoBusca) ||
+      d.rua.toLowerCase().includes(termoBusca) ||
+      d.bairro.toLowerCase().includes(termoBusca) ||
+      d.categoria.toLowerCase().includes(termoBusca) ||
+      d.protocolo.toString().includes(termoBusca)
+    );
+  });
 
-  if (demandas.length === 0) {
+  totalDemandasSpan.innerText = `Total: ${demandasFiltradas.length} de ${demandas.length}`;
+
+  if (demandasFiltradas.length === 0) {
     tabelaDemandasBody.innerHTML = `
       <tr>
         <td colspan="5" class="py-8 text-center text-gray-400 text-xs italic">
-          Nenhuma demanda cadastrada no momento. Use o formulário ao lado.
+          Nenhuma demanda encontrada.
         </td>
       </tr>`;
     return;
   }
 
-  demandas.forEach((demanda) => {
+  demandasFiltradas.forEach((demanda) => {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-gray-50 transition duration-150 border-b border-gray-100';
 
@@ -132,7 +142,6 @@ function renderizarTabela() {
   });
 }
 
-// 4. FUNÇÃO PARA DISPARAR O WHATSAPP
 function enviarWhatsApp(id) {
   const demanda = demandas.find((d) => d.id === id);
   if (!demanda) return;
@@ -149,7 +158,7 @@ function enviarWhatsApp(id) {
 
   const textoMensagem = `Olá, ${demanda.nome}! 👋
 
-Aqui é do Gabinete do Vereador. Passando para atualizar sobre a sua solicitação referente a *${demanda.categoria}* na região de *${demanda.rua}, Bairro ${demanda.bairro}* (Protocolo #${demanda.protocolo}).
+Aqui é do Gabinete do Vereador Patrick Motta. Passando para atualizar sobre a sua solicitação referente a *${demanda.categoria}* na região de *${demanda.rua}, Bairro ${demanda.bairro}* (Protocolo #${demanda.protocolo}).
 
 📌 *Status Atual:* ${demanda.status.toUpperCase()}
 
@@ -159,7 +168,6 @@ Qualquer novidade ou atualização, informaremos você por aqui. Conte conosco! 
   window.open(urlWhatsApp, '_blank');
 }
 
-// 5. ALTERAR STATUS
 function alterarStatus(id, novoStatus) {
   const demanda = demandas.find((d) => d.id === id);
   if (demanda) {
@@ -169,7 +177,6 @@ function alterarStatus(id, novoStatus) {
   }
 }
 
-// 6. EXCLUIR DEMANDA
 function excluirDemanda(id) {
   if (confirm('Tem certeza que deseja excluir este registro?')) {
     demandas = demandas.filter((d) => d.id !== id);
