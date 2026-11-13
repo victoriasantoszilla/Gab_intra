@@ -10,33 +10,33 @@ const totalDemandasSpan = document.getElementById('totalDemandas');
 formDemanda.addEventListener('submit', function (e) {
   e.preventDefault();
 
-  // Capturando valores dos campos
+  // Capturando valores dos campos (agora incluindo rua e bairro textuais)
   const nome = document.getElementById('nome').value.trim();
-  const telefone = document.getElementById('telefone').value.trim().replace(/\D/g, ''); // limpa caracteres não numéricos
-  const bairro = document.getElementById('bairro').value;
+  const telefone = document.getElementById('telefone').value.trim().replace(/\D/g, '');
+  const rua = document.getElementById('rua').value.trim();
+  const bairro = document.getElementById('bairro').value.trim();
   const origem = document.getElementById('origem').value;
   const categoria = document.getElementById('categoria').value;
   const descricao = document.getElementById('descricao').value.trim();
 
   // Criando o objeto da nova demanda
   const novaDemanda = {
-    id: Date.now(), // ID único baseado no timestamp
-    protocolo: Math.floor(1000 + Math.random() * 9000), // Protocolo de 4 dígitos
+    id: Date.now(),
+    protocolo: Math.floor(1000 + Math.random() * 9000),
     nome,
     telefone,
+    rua,
     bairro,
     origem,
     categoria,
     descricao,
-    status: 'Pendente', // Status inicial padrão
+    status: 'Pendente',
     dataCriacao: new Date().toLocaleDateString('pt-BR')
   };
 
-  // Adicionando ao array e salvando no localStorage
-  demandas.unshift(novaDemanda); // Adiciona no início da lista
+  demandas.unshift(novaDemanda);
   salvarNoLocalStorage();
 
-  // Limpando o formulário e atualizando a tela
   formDemanda.reset();
   renderizarTabela();
 });
@@ -49,8 +49,6 @@ function salvarNoLocalStorage() {
 // 3. FUNÇÃO PARA RENDERIZAR A TABELA DINÂMICA
 function renderizarTabela() {
   tabelaDemandasBody.innerHTML = '';
-
-  // Atualiza contador total
   totalDemandasSpan.innerText = `Total: ${demandas.length} registradas`;
 
   if (demandas.length === 0) {
@@ -67,13 +65,11 @@ function renderizarTabela() {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-gray-50 transition duration-150 border-b border-gray-100';
 
-    // Cor da tag de Origem
     let tagOrigemCor = 'bg-gray-100 text-gray-700';
     if (demanda.origem === 'WhatsApp') tagOrigemCor = 'bg-emerald-100 text-emerald-800';
     if (demanda.origem === 'Instagram') tagOrigemCor = 'bg-pink-100 text-pink-800';
     if (demanda.origem === 'Presencial') tagOrigemCor = 'bg-amber-100 text-amber-800';
 
-    // Cor do Status
     let statusCor = 'bg-yellow-100 text-yellow-800';
     if (demanda.status === 'Em Andamento') statusCor = 'bg-blue-100 text-blue-800';
     if (demanda.status === 'Resolvido') statusCor = 'bg-green-100 text-green-800';
@@ -84,7 +80,10 @@ function renderizarTabela() {
         <div class="text-xs text-gray-400">Prot. #${demanda.protocolo} • ${demanda.dataCriacao}</div>
         <div class="text-xs text-gray-500 mt-1 line-clamp-1" title="${escapeHtml(demanda.descricao)}">${escapeHtml(demanda.categoria)}: "${escapeHtml(demanda.descricao)}"</div>
       </td>
-      <td class="py-3 px-3 text-xs text-gray-600 font-medium">${escapeHtml(demanda.bairro)}</td>
+      <td class="py-3 px-3 text-xs text-gray-600">
+        <div class="font-medium text-gray-800">${escapeHtml(demanda.rua)}</div>
+        <div class="text-gray-500">Bairro: ${escapeHtml(demanda.bairro)}</div>
+      </td>
       <td class="py-3 px-3">
         <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${tagOrigemCor}">
           ${demanda.origem}
@@ -99,12 +98,10 @@ function renderizarTabela() {
         </select>
       </td>
       <td class="py-3 px-3 text-center space-x-1">
-        <!-- Botão Disparo de WhatsApp -->
         <button onclick="enviarWhatsApp(${demanda.id})" title="Enviar atualização pelo WhatsApp"
           class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg transition font-medium inline-flex items-center gap-1">
           <span>💬</span> WhatsApp
         </button>
-        <!-- Botão Excluir -->
         <button onclick="excluirDemanda(${demanda.id})" title="Excluir Demanda"
           class="bg-red-50 hover:bg-red-100 text-red-600 text-xs px-2 py-1.5 rounded-lg transition">
           🗑️
@@ -116,7 +113,7 @@ function renderizarTabela() {
   });
 }
 
-// 4. FUNÇÃO PARA DISPARAR O WHATSAPP COM MENSAGEM DINÂMICA
+// 4. FUNÇÃO PARA DISPARAR O WHATSAPP COM A RUA E O BAIRRO
 function enviarWhatsApp(id) {
   const demanda = demandas.find((d) => d.id === id);
   if (!demanda) return;
@@ -126,25 +123,20 @@ function enviarWhatsApp(id) {
     return;
   }
 
-  // Ajusta DDI 55 do Brasil se não estiver incluído
   let numTelefone = demanda.telefone;
   if (!numTelefone.startsWith('55') && numTelefone.length <= 11) {
     numTelefone = '55' + numTelefone;
   }
 
-  // Criação da mensagem dinâmica personalizada
   const textoMensagem = `Olá, ${demanda.nome}! 👋
 
-Aqui é do Gabinete do Vereador. Passando para atualizar sobre a sua solicitação referente a *${demanda.categoria}* no bairro *${demanda.bairro}* (Protocolo #${demanda.protocolo}).
+Aqui é do Gabinete do Vereador. Passando para atualizar sobre a sua solicitação referente a *${demanda.categoria}* na região de *${demanda.rua}, Bairro ${demanda.bairro}* (Protocolo #${demanda.protocolo}).
 
 📌 *Status Atual:* ${demanda.status.toUpperCase()}
 
-Qualquer novidade ou atualização sobre a sua demanda, informaremos você por aqui. Conte conosco! 😊`;
+Qualquer novidade ou atualização, informaremos você por aqui. Conte conosco! 😊`;
 
-  // URL Encode para montar a chamada de link do WhatsApp
   const urlWhatsApp = `https://wa.me/${numTelefone}?text=${encodeURIComponent(textoMensagem)}`;
-
-  // Abre o WhatsApp Web / App em uma nova aba
   window.open(urlWhatsApp, '_blank');
 }
 
@@ -167,12 +159,10 @@ function excluirDemanda(id) {
   }
 }
 
-// Auxiliar para evitar problemas de XSS nos textos inseridos pelo usuário
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.innerText = text;
   return div.innerHTML;
 }
 
-// Renderiza a tabela ao carregar a página
 renderizarTabela();

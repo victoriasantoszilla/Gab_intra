@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Intranet do Gabinete - Gestão de Demandas</title>
-  <!-- Tailwind CSS via CDN (Leve e direto no navegador) -->
+  <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen text-gray-800">
@@ -19,14 +19,14 @@
           <p class="text-xs text-blue-200">Sistema Único de Triagem e Gestão de Demandas</p>
         </div>
       </div>
-      <span class="bg-blue-800 text-xs px-3 py-1 rounded-full border border-blue-700">MVP v1.0</span>
+      <span class="bg-blue-800 text-xs px-3 py-1 rounded-full border border-blue-700">MVP v1.1</span>
     </div>
   </header>
 
   <!-- Conteúdo Principal -->
   <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
     
-    <!-- COLUNA 1: Form de Triagem (1 Coluna em telas grandes) -->
+    <!-- COLUNA 1: Form de Triagem -->
     <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit">
       <h2 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
         <span>📝</span> Cadastrar Nova Demanda
@@ -49,19 +49,23 @@
             class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
 
-        <!-- Bairro e Origem do Canal (Grid de 2 colunas) -->
+        <!-- Rua e Bairro (Campos de texto livre) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-1">Bairro</label>
-            <select id="bairro" required class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-              <option value="">Selecione...</option>
-              <option value="Centro">Centro</option>
-              <option value="Vila Nova">Vila Nova</option>
-              <option value="Jardim América">Jardim América</option>
-              <option value="Outro">Outro</option>
-            </select>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Rua / Logradouro</label>
+            <input type="text" id="rua" required placeholder="Ex: Rua das Flores, 123" 
+              class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Bairro</label>
+            <input type="text" id="bairro" required placeholder="Ex: Centro" 
+              class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Origem da Demanda e Categoria -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">Origem da Demanda</label>
             <select id="origem" required class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
@@ -71,18 +75,17 @@
               <option value="Telefone">📞 Ligação</option>
             </select>
           </div>
-        </div>
 
-        <!-- Categoria do Serviço -->
-        <div>
-          <label class="block text-xs font-semibold text-gray-700 mb-1">Categoria do Pedido</label>
-          <select id="categoria" required class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-            <option value="Iluminação Pública">Iluminação Pública</option>
-            <option value="Tapa-Buraco / Asfalto">Tapa-Buraco / Asfalto</option>
-            <option value="Poda de Árvores">Poda de Árvores / Limpeza</option>
-            <option value="Saúde / Posto de Saúde">Saúde / Posto de Saúde</option>
-            <option value="Outros">Outros</option>
-          </select>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Categoria</label>
+            <select id="categoria" required class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+              <option value="Iluminação Pública">Iluminação Pública</option>
+              <option value="Tapa-Buraco / Asfalto">Tapa-Buraco / Asfalto</option>
+              <option value="Poda de Árvores">Poda de Árvores</option>
+              <option value="Saúde">Saúde / Posto</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
         </div>
 
         <!-- Descrição da Demanda -->
@@ -101,7 +104,7 @@
       </form>
     </section>
 
-    <!-- COLUNA 2: Tabela de Acompanhamento (2 Colunas em telas grandes) -->
+    <!-- COLUNA 2: Tabela de Acompanhamento -->
     <section class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
@@ -121,14 +124,13 @@
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs uppercase font-semibold">
               <th class="py-3 px-3">Cidadão / Contato</th>
-              <th class="py-3 px-3">Bairro</th>
+              <th class="py-3 px-3">Local (Rua / Bairro)</th>
               <th class="py-3 px-3">Origem</th>
               <th class="py-3 px-3">Status</th>
-              <th class="py-3 px-3 text-center">Ações de Retorno</th>
+              <th class="py-3 px-3 text-center">Ações</th>
             </tr>
           </thead>
           <tbody id="tabelaDemandasBody" class="divide-y divide-gray-100">
-            <!-- As linhas serão inseridas dinamicamente via JavaScript aqui -->
             <tr>
               <td colspan="5" class="py-8 text-center text-gray-400 text-xs italic">
                 Nenhuma demanda cadastrada no momento. Use o formulário ao lado.
@@ -140,7 +142,8 @@
     </section>
 
   </main>
-  <script src="script.js"></script>
 
+  <!-- Script JS -->
+  <script src="script.js"></script>
 </body>
 </html>
