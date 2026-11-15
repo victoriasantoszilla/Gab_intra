@@ -19,14 +19,14 @@
           <p class="text-xs text-blue-200">Sistema Único de Triagem e Gestão de Demandas</p>
         </div>
       </div>
-      <span class="bg-blue-800 text-xs px-3 py-1 rounded-full border border-blue-700">MVP v1.4</span>
+      <span class="bg-blue-800 text-xs px-3 py-1 rounded-full border border-blue-700">MVP v1.5</span>
     </div>
   </header>
 
   <!-- Conteúdo Principal -->
   <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
     
-    <!-- COLUNA 1: Form de Triagem -->
+    <!-- COLUNA 1: Form de Triagem (Limpo e Rápido) -->
     <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit">
       <h2 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
         <span>📝</span> Cadastrar Nova Demanda
@@ -98,23 +98,9 @@
             class="w-full text-sm px-3 py-2 border border-amber-300 bg-amber-50 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
         </div>
 
-        <!-- Campos Opcionais da Câmara (Indicação e Processo) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-blue-50 p-3 rounded-lg border border-blue-100">
-          <div>
-            <label class="block text-xs font-semibold text-blue-900 mb-1">Nº de Indicação (Opcional)</label>
-            <input type="text" id="indicação" placeholder="Ex: Ind. 123/2026" 
-              class="w-full text-sm px-3 py-1.5 border border-blue-200 bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-blue-900 mb-1">Nº do Processo (Opcional)</label>
-            <input type="text" id="processo" placeholder="Ex: Proc. 456/2026" 
-              class="w-full text-sm px-3 py-1.5 border border-blue-200 bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-        </div>
-
-        <!-- Descrição da Demanda (Texto ajustado e mais direto) -->
+        <!-- Descrição da Demanda -->
         <div>
-          <label class="block text-xs font-semibold text-gray-700 mb-1">Descreva a solicitação ou necessidade. O que o munícipe gostaria que fosse realizado?</label>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Descreva a solicitação ou necessidade.</label>
           <textarea id="descricao" rows="3" required placeholder="Detalhe o que o munícipe pediu..." 
             class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
         </div>
@@ -136,7 +122,7 @@
           <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
             <span>📊</span> Painel Geral de Demandas
           </h2>
-          <p class="text-xs text-gray-500">Acompanhe o andamento e envie retornos via WhatsApp em 1 clique.</p>
+          <p class="text-xs text-gray-500">Acompanhe o andamento, vincule protocolos da Câmara e envie retornos via WhatsApp.</p>
         </div>
         <span id="totalDemandas" class="bg-gray-100 text-gray-700 font-medium text-xs px-3 py-1.5 rounded-lg border">
           Total: 0 registradas
@@ -173,6 +159,51 @@
     </section>
 
   </main>
+
+  <!-- JANELA MODAL: Vincular Dados Oficiais da Câmara -->
+  <div id="modalCamara" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-gray-200">
+      
+      <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
+        <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+          <span>📄</span> Dados Oficiais da Câmara
+        </h3>
+        <button onclick="fecharModalCamara()" class="text-gray-400 hover:text-gray-600 text-lg font-bold">&times;</button>
+      </div>
+
+      <p id="modalSubtitulo" class="text-xs text-gray-500 mb-4">
+        Preencha caso esta solicitação tenha gerado indicação ou processo oficial.
+      </p>
+
+      <form id="formModalCamara" class="space-y-4">
+        <input type="hidden" id="modalDemandaId">
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Nº de Indicação / Ofício</label>
+          <input type="text" id="modalIndicacao" placeholder="Ex: Indicação nº 142/2026" 
+            class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Nº do Processo Administrativo</label>
+          <input type="text" id="modalProcesso" placeholder="Ex: Processo nº 889/2026" 
+            class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="fecharModalCamara()" 
+            class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+            Cancelar
+          </button>
+          <button type="submit" 
+            class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow-sm">
+            Salvar Protocolos
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
 
   <!-- Script JS -->
   <script src="script.js"></script>

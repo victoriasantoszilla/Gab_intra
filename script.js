@@ -1,11 +1,20 @@
 let demandas = JSON.parse(localStorage.getItem('demandas_gabinete')) || [];
 
+// Elementos do DOM
 const formDemanda = document.getElementById('formDemanda');
 const tabelaDemandasBody = document.getElementById('tabelaDemandasBody');
 const totalDemandasSpan = document.getElementById('totalDemandas');
 const selectCategoria = document.getElementById('categoria');
 const divOutrosEspecificar = document.getElementById('divOutrosEspecificar');
 const inputBusca = document.getElementById('inputBusca');
+
+// Elementos do Modal da Câmara
+const modalCamara = document.getElementById('modalCamara');
+const formModalCamara = document.getElementById('formModalCamara');
+const modalDemandaId = document.getElementById('modalDemandaId');
+const modalIndicacao = document.getElementById('modalIndicacao');
+const modalProcesso = document.getElementById('modalProcesso');
+const modalSubtitulo = document.getElementById('modalSubtitulo');
 
 function verificarCategoriaOutros() {
   if (selectCategoria.value === 'Outros') {
@@ -18,6 +27,7 @@ function verificarCategoriaOutros() {
   }
 }
 
+// 1. CADASTRO INICIAL (LIMPO)
 formDemanda.addEventListener('submit', function (e) {
   e.preventDefault();
 
@@ -35,8 +45,6 @@ formDemanda.addEventListener('submit', function (e) {
     }
   }
 
-  const indicação = document.getElementById('indicação').value.trim();
-  const processo = document.getElementById('processo').value.trim();
   const descricao = document.getElementById('descricao').value.trim();
 
   const novaDemanda = {
@@ -48,8 +56,8 @@ formDemanda.addEventListener('submit', function (e) {
     bairro,
     origem,
     categoria,
-    indicação,
-    processo,
+    indicacao: '', // Começa vazio na triagem inicial
+    processo: '',  // Começa vazio na triagem inicial
     descricao,
     status: 'Pendente',
     dataCriacao: new Date().toLocaleDateString('pt-BR')
@@ -67,19 +75,59 @@ function salvarNoLocalStorage() {
   localStorage.setItem('demandas_gabinete', JSON.stringify(demandas));
 }
 
+// 2. FUNÇÕES DA JANELA MODAL DA CÂMARA
+function abrirModalCamara(id) {
+  const demanda = demandas.find((d) => d.id === id);
+  if (!demanda) return;
+
+  modalDemandaId.value = demanda.id;
+  modalIndicacao.value = demanda.indicacao || '';
+  modalProcesso.value = demanda.processo || '';
+  modalSubtitulo.innerText = `Solicitante: ${demanda.nome} (Prot. Interno #${demanda.protocolo})`;
+
+  modalCamara.classList.remove('hidden');
+  modalCamara.classList.add('flex');
+}
+
+function fecharModalCamara() {
+  modalCamara.classList.add('hidden');
+  modalCamara.classList.remove('flex');
+}
+
+formModalCamara.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const id = Number(modalDemandaId.value);
+  const demanda = demandas.find((d) => d.id === id);
+
+  if (demanda) {
+    demanda.indicacao = modalIndicacao.value.trim();
+    demanda.processo = modalProcesso.value.trim();
+    salvarNoLocalStorage();
+    renderizarTabela();
+  }
+
+  fecharModalCamara();
+});
+
+// 3. RENDERIZAÇÃO DA TABELA
 function renderizarTabela() {
   tabelaDemandasBody.innerHTML = '';
   
   const termoBusca = inputBusca ? inputBusca.value.toLowerCase() : '';
   const demandasFiltradas = demandas.filter(d => {
+    // Compatibilidade caso existam registros antigos com acento na propriedade
+    const ind = d.indicacao || d['indicação'] || '';
+    const proc = d.processo || '';
+
     return (
       d.nome.toLowerCase().includes(termoBusca) ||
       d.rua.toLowerCase().includes(termoBusca) ||
       d.bairro.toLowerCase().includes(termoBusca) ||
       d.categoria.toLowerCase().includes(termoBusca) ||
       d.protocolo.toString().includes(termoBusca) ||
-      (d.indicação && d.indicação.toLowerCase().includes(termoBusca)) ||
-      (d.processo && d.processo.toLowerCase().includes(termoBusca))
+      ind.toLowerCase().includes(termoBusca) ||
+      proc.toLowerCase().includes(termoBusca)
     );
   });
 
@@ -108,14 +156,25 @@ function renderizarTabela() {
     if (demanda.status === 'Em Andamento') statusCor = 'bg-blue-100 text-blue-800';
     if (demanda.status === 'Resolvido') statusCor = 'bg-green-100 text-green-800';
 
-    // Montando a tag de documentos oficiais da câmara, se preenchidos
-    let infoCamara = `<div class="text-xs text-gray-500 mt-1">Origem: ${demanda.origem}</div>`;
-    if (demanda.indicação || demanda.processo) {
-      infoCamara += `<div class="text-xs text-blue-700 mt-0.5 font-medium">`;
-      if (demanda.indicação) infoCamara += `Ind: ${escapeHtml(demanda.indicação)} `;
-      if (demanda.processo) infoCamara += `Proc: ${escapeHtml(demanda.processo)}`;
+    const indAtual = demanda.indicacao || demanda['indicação'] || '';
+    const procAtual = demanda.processo || '';
+
+    // Exibição visual dos protocolos da Câmara na coluna
+    let infoCamara = '';
+    if (indAtual || procAtual) {
+      infoCamara = `<div class="mt-1.5 bg-blue-50 border border-blue-100 rounded px-2 py-1 text-xs text-blue-800 space-y-0.5">`;
+      if (indAtual) infoCamara += `<div><b>Ind:</b> ${escapeHtml(indAtual)}</div>`;
+      if (procAtual) infoCamara += `<div><b>Proc:</b> ${escapeHtml(procAtual)}</div>`;
       infoCamara += `</div>`;
+    } else {
+      infoCamara = `<div class="text-[11px] text-gray-400 mt-1 italic">Sem protocolo oficial</div>`;
     }
+
+    // Estilo do botão da Câmara (destaca se já tiver protocolo vinculado)
+    const temProtocolo = Boolean(indAtual || procAtual);
+    const btnCamaraClasse = temProtocolo 
+      ? 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300' 
+      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200';
 
     tr.innerHTML = `
       <td class="py-3 px-3">
@@ -141,15 +200,21 @@ function renderizarTabela() {
           <option value="Resolvido" ${demanda.status === 'Resolvido' ? 'selected' : ''}>✅ Resolvido</option>
         </select>
       </td>
-      <td class="py-3 px-3 text-center space-x-1">
-        <button onclick="enviarWhatsApp(${demanda.id})" title="Enviar atualização pelo WhatsApp"
-          class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg transition font-medium inline-flex items-center gap-1">
-          <span>💬</span> WhatsApp
-        </button>
-        <button onclick="excluirDemanda(${demanda.id})" title="Excluir Demanda"
-          class="bg-red-50 hover:bg-red-100 text-red-600 text-xs px-2 py-1.5 rounded-lg transition">
-          🗑️
-        </button>
+      <td class="py-3 px-3 text-center">
+        <div class="flex items-center justify-center gap-1.5 flex-wrap">
+          <button onclick="abrirModalCamara(${demanda.id})" title="Vincular ou editar Nº de Indicação e Processo"
+            class="${btnCamaraClasse} text-xs px-2.5 py-1.5 rounded-lg transition font-medium inline-flex items-center gap-1">
+            <span>📄</span> Câmara
+          </button>
+          <button onclick="enviarWhatsApp(${demanda.id})" title="Enviar atualização pelo WhatsApp"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1.5 rounded-lg transition font-medium inline-flex items-center gap-1">
+            <span>💬</span> WhatsApp
+          </button>
+          <button onclick="excluirDemanda(${demanda.id})" title="Excluir Demanda"
+            class="bg-red-50 hover:bg-red-100 text-red-600 text-xs px-2 py-1.5 rounded-lg transition">
+            🗑️
+          </button>
+        </div>
       </td>
     `;
 
@@ -157,6 +222,7 @@ function renderizarTabela() {
   });
 }
 
+// 4. WHATSAPP AUTOMATIZADO COM PROTOCOLOS OFICIAIS
 function enviarWhatsApp(id) {
   const demanda = demandas.find((d) => d.id === id);
   if (!demanda) return;
@@ -171,12 +237,14 @@ function enviarWhatsApp(id) {
     numTelefone = '55' + numTelefone;
   }
 
-  // Injetando os números da câmara no texto do WhatsApp se existirem
+  const indAtual = demanda.indicacao || demanda['indicação'] || '';
+  const procAtual = demanda.processo || '';
+
   let blocoCamara = '';
-  if (demanda.indicação || demanda.processo) {
-    blocoCamara = `\n📄 *Dados Oficiais na Câmara:*`;
-    if (demanda.indicação) blocoCamara += `\n• Indicação: ${demanda.indicação}`;
-    if (demanda.processo) blocoCamara += `\n• Processo: ${demanda.processo}`;
+  if (indAtual || procAtual) {
+    blocoCamara = `\n\n📄 *Tramitação Oficial na Câmara:*`;
+    if (indAtual) blocoCamara += `\n• *Indicação/Ofício:* ${indAtual}`;
+    if (procAtual) blocoCamara += `\n• *Processo:* ${procAtual}`;
   }
 
   const textoMensagem = `Olá, ${demanda.nome}! 👋
@@ -191,6 +259,7 @@ Qualquer novidade ou atualização, informaremos você por aqui. Conte conosco! 
   window.open(urlWhatsApp, '_blank');
 }
 
+// 5. ALTERAR STATUS
 function alterarStatus(id, novoStatus) {
   const demanda = demandas.find((d) => d.id === id);
   if (demanda) {
@@ -200,6 +269,7 @@ function alterarStatus(id, novoStatus) {
   }
 }
 
+// 6. EXCLUIR DEMANDA
 function excluirDemanda(id) {
   if (confirm('Tem certeza que deseja excluir este registro?')) {
     demandas = demandas.filter((d) => d.id !== id);
